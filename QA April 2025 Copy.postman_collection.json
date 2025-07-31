@@ -1,0 +1,815 @@
+{
+	"info": {
+		"_postman_id": "fca6acea-b2c8-44a0-818f-a14a958580a0",
+		"name": "QA April 2025 Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26117918",
+		"_collection_link": "https://qa9999-6759.postman.co/workspace/Newtech-academy-online~c1b3c6b2-6842-462b-a43d-45ff4c4ae06e/collection/26117918-fca6acea-b2c8-44a0-818f-a14a958580a0?action=share&source=collection_link&creator=26117918"
+	},
+	"item": [
+		{
+			"name": "Get All bookings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/booking",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get booking by Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"// Validate the structure of the response\r",
+							"pm.test(\"Response structure is valid\", function () {\r",
+							"    pm.expect(response).to.be.an('object');\r",
+							"    pm.expect(response).to.have.all.keys('firstname', 'lastname', 'totalprice', 'depositpaid', 'bookingdates', 'additionalneeds');\r",
+							"    \r",
+							"    pm.expect(response.firstname).to.be.a('string');\r",
+							"    pm.expect(response.lastname).to.be.a('string');\r",
+							"    pm.expect(response.totalprice).to.be.a('number');\r",
+							"    pm.expect(response.depositpaid).to.be.a('boolean');\r",
+							"    \r",
+							"    pm.expect(response.bookingdates).to.be.an('object');\r",
+							"    pm.expect(response.bookingdates).to.have.all.keys('checkin', 'checkout');\r",
+							"    pm.expect(response.bookingdates.checkin).to.be.a('string');\r",
+							"    pm.expect(response.bookingdates.checkout).to.be.a('string');\r",
+							"    \r",
+							"    pm.expect(response.additionalneeds).to.be.a('string');\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/booking/{{ID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"booking",
+						"{{ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Booking by booker name",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"// Get the URL search parameters\r",
+							"const url = new url(pm.request.url);\r",
+							"const params = url.searchParams;\r",
+							"\r",
+							"// Iterate through each query parameter and save it as an environment variable\r",
+							"params.forEach((value, key) => {\r",
+							"    pm.environment.set(key, value);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"const baseUrl = pm.environment.get(\"URL\");\r",
+							"const bookingIds = response.map(item => item.bookingid);\r",
+							"\r",
+							"bookingIds.forEach(bookingId => {\r",
+							"    pm.sendRequest(`${baseUrl}/booking:${bookingId}`, (err, res) => {\r",
+							"        if (err) {\r",
+							"            pm.expect.fail(`Request failed for bookingId: ${bookingId}`);\r",
+							"        } else {\r",
+							"            const bookingDetails = res.json();\r",
+							"            const queryParams = pm.request.url.query;\r",
+							"            const firstName = queryParams.find(param => param.key === 'firstname').value;\r",
+							"            const lastName = queryParams.find(param => param.key === 'lastname').value;\r",
+							"\r",
+							"            pm.expect(bookingDetails.firstname).to.equal(firstName);\r",
+							"            pm.expect(bookingDetails.lastname).to.equal(lastName);\r",
+							"        }\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/booking?firstname=John&lastname=Smith",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"booking"
+					],
+					"query": [
+						{
+							"key": "firstname",
+							"value": "John"
+						},
+						{
+							"key": "lastname",
+							"value": "Smith"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter By checkin checkout date",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create New Booking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"ID\", pm.response.json().bookingid);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"Ali\",\r\n    \"lastname\" : \"Taha\",\r\n    \"totalprice\" : 60,\r\n    \"depositpaid\" : true,\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"2025-07-01\",\r\n        \"checkout\" : \"2025-07-21\"\r\n    },\r\n    \"additionalneeds\" : \"Breakfast\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.set('TOKEN', pm.response.json().token);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\" : \"admin\",\r\n    \"password\" : \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/auth",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Booking",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token=aa1955a3f080a37",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"Amjad\",\r\n    \"lastname\" : \"Brown\",\r\n    \"totalprice\" : 111,\r\n    \"depositpaid\" : true,\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"2018-01-01\",\r\n        \"checkout\" : \"2019-01-01\"\r\n    },\r\n    \"additionalneeds\" : \"Breakfast\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/3634",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"3634"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Booking Using XML in body",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token=eaaf88f43eb43b4",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46cGFzc3dvcmQxMjM=",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<booking>\r\n    <firstname>ALI</firstname>\r\n    <lastname>AHMAD</lastname>\r\n    <totalprice>111</totalprice>\r\n    <depositpaid>true</depositpaid>\r\n    <bookingdates>\r\n      <checkin>2018-01-01</checkin>\r\n      <checkout>2019-01-01</checkout>\r\n    </bookingdates>\r\n    <additionalneeds>Breakfast</additionalneeds>\r\n  </booking>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/388",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"388"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Partial Update for booking",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token=bdd336868486c1c",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"James\",\r\n    \"lastname\" : \"Brown\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/3541",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"3541"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Partial Update for booking XML",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token=bdd336868486c1c",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<booking>\r\n    <firstname>James</firstname>\r\n    <lastname>Brown</lastname>\r\n</booking>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/3541",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"3541"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Booking",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token=8576f8f7473029d",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://restful-booker.herokuapp.com/booking/292",
+					"protocol": "https",
+					"host": [
+						"restful-booker",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"booking",
+						"292"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "https://www.google.com/search?q=New+tech+academy&sca_esv=088ff9148b2d1b7b&source=hp&ei=-n5daNNKr6SR1Q_GkeBA&iflsig=AOw8s4IAAAAAaF2NCtmyMdXKUP33XpiOwkqz6J9Wp9-k&ved=0ahUKEwjTr4mWyo-OAxUvUqQEHcYIGAgQ4dUDCBc&uact=5&oq=New+tech+academy&gs_lp=Egdnd3Mtd2l6IhBOZ",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-US,en;q=0.9,ar;q=0.8"
+					},
+					{
+						"key": "available-dictionary",
+						"value": ":yZxs/3Ul71B7XWCStnf6gZgi0AqJ0XmayDjX5H08BOg=:"
+					},
+					{
+						"key": "downlink",
+						"value": "10"
+					},
+					{
+						"key": "priority",
+						"value": "u=0, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://www.google.com/"
+					},
+					{
+						"key": "rtt",
+						"value": "50"
+					},
+					{
+						"key": "sec-ch-prefers-color-scheme",
+						"value": "dark"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\""
+					},
+					{
+						"key": "sec-ch-ua-arch",
+						"value": "\"x86\""
+					},
+					{
+						"key": "sec-ch-ua-bitness",
+						"value": "\"64\""
+					},
+					{
+						"key": "sec-ch-ua-form-factors",
+						"value": "\"Desktop\""
+					},
+					{
+						"key": "sec-ch-ua-full-version",
+						"value": "\"137.0.7151.120\""
+					},
+					{
+						"key": "sec-ch-ua-full-version-list",
+						"value": "\"Google Chrome\";v=\"137.0.7151.120\", \"Chromium\";v=\"137.0.7151.120\", \"Not/A)Brand\";v=\"24.0.0.0\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-model",
+						"value": "\"\""
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Windows\""
+					},
+					{
+						"key": "sec-ch-ua-platform-version",
+						"value": "\"19.0.0\""
+					},
+					{
+						"key": "sec-ch-ua-wow64",
+						"value": "?0"
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "document"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "navigate"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "sec-fetch-user",
+						"value": "?1"
+					},
+					{
+						"key": "upgrade-insecure-requests",
+						"value": "1"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "x-browser-channel",
+						"value": "stable"
+					},
+					{
+						"key": "x-browser-copyright",
+						"value": "Copyright 2025 Google LLC. All rights reserved."
+					},
+					{
+						"key": "x-browser-validation",
+						"value": "J9DSnQ4ykHeik2fBjbqtH+hIrks="
+					},
+					{
+						"key": "x-browser-year",
+						"value": "2025"
+					},
+					{
+						"key": "x-client-data",
+						"value": "CJa2yQEIo7bJAQipncoBCNWTywEIlqHLAQiSo8sBCIWgzQEIxd/OAQif7c4BCKXyzgEIvPLOAQiS9s4BGOHizgE="
+					},
+					{
+						"key": "Cookie",
+						"value": "SID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UIs4X1YjaBAD_97JNV3i5sgACgYKAe0SARESFQHGX2Mi5nFXevwv4KWHAoqvv0MrKBoVAUF8yKqCjPbvxvxxdxDpT_k8ZwXX0076; __Secure-1PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7U0ppMr430hrstMVXk0BOLvQACgYKAaMSARESFQHGX2MitltmByCdk6MykqxDXr1K0xoVAUF8yKp8MUdQzweafXvLBslC-Jvg0076; __Secure-3PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UH1VyO8IN-Y44DJlUdTG3QQACgYKAYkSARESFQHGX2MiN2BybW_CsK8W2MnQviD7YxoVAUF8yKrzUHS3vJDAZZAYBvDvI44s0076; HSID=AETAjawFsEeXE9KH9; SSID=AstZ14WOQqmHWE-Pj; APISID=ZTGnk3yypbiqydGU/A8bMzxBYx-MaOYshV; SAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-1PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-3PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; S=maestro=e9k8qnSzeeYhyaATGrIzu1fkejEkndS_9VDwVW25Wq4; NID=525=F82LbOqArVSwEHFNfMKyPUOYcf7yxGWUjou5YNvIxN56U8p9htTkjm-nYWLSBhiRrNHrL-_Q5Bi723-3V_Aq4PVAcVUae35GB2YaUCVM1pGgTcL26DKqcG3YA_j6WAueW5SRg5a6ro9J4907uZuEasU2fJ_jpeXk6ih4AB8tmdRXjaljScoChzMMa2S75ocuvuRg1-OsmU-iS5iyDydFenIa4BVMwcbg1njTx3QrOrTtjRTmkUrjxBD977qh5iZEa-6jmJjpUtlYTSnijCo_25z_e6IJq0qrCKWFFH7kVjwWEFiC6IfsDs6INXdTosfpCELtc63B43fLM9snSjgHyYqm-beU3g93s9hGpZeeEpQ-4v4fYU11zawbfChB65zA9YO_P9ophrBJiNRwrhB1Kq-DMJGaVZULEK6GDSmlcyPQGCscmvGcEvtfep1q2Pp5smtXYLtFvZXNa-VIdNrWL9BH9YPx9ufHaEA0dx3P_emUE7wf1VF0uVfm-9-VuMpdtl5Hr5XogTaEfmhpR07CLDkHT0c94iqZT635uDzO7tb1lD6a3eRCcp4sz0QY-EsW-8cJEz7UAudQPWGmhkrNb7UJM8C_81nCE7IhIO3oQmQMiikR7P8vVv-02C6qjljPMdv-qId2wyHI-aXnpsC7Z_nlvCgjct0GY7Dp-BHNmwfxUt2GirbCSqKWxlhlAvfj3DmkpbgMe7fwv7o_VgTKP5U6Dv22bWdWzftyj86XZprJT4y9VDvzC7z3y37oh4Ng118xFzwDybP-t-pdJWDzBRKt-q9w5UhpYOX-qryqzrP85UV7g-94HWWb8fuHNxE; __Secure-1PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; __Secure-3PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; AEC=AVh_V2h9T-uCiqQIu0AwqNRExINkYOuyJ2MZ-kPLgooRAvVeXrKIicWiiso; SIDCC=AKEyXzWEaN6KpkqlnxTkCOEoaXmpmY3HiF_Ssb8BkIVLupC9cBKFerV6Lubg1fnCvph840fcgr_-; __Secure-1PSIDCC=AKEyXzXKukFdLfgLxJT3nKHFLwrMUyont-Dc4UipAfSka9fK_iBI7TDbbPpx3O8Apuv8xAFz5I0; __Secure-3PSIDCC=AKEyXzUjW5ZLcwZBqwzOyBWrU8BK03YELMZqM0jJFLVyyNR4vLUHWx5iyZURyV_69mjCUrhLiAyQ"
+					}
+				],
+				"url": {
+					"raw": "https://www.google.com/search?q=New+tech+academy&sca_esv=088ff9148b2d1b7b&source=hp&ei=-n5daNNKr6SR1Q_GkeBA&iflsig=AOw8s4IAAAAAaF2NCtmyMdXKUP33XpiOwkqz6J9Wp9-k&ved=0ahUKEwjTr4mWyo-OAxUvUqQEHcYIGAgQ4dUDCBc&uact=5&oq=New+tech+academy&gs_lp=Egdnd3Mtd2l6IhBOZXcgdGVjaCBhY2FkZW15MgUQABiABDIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHkjZbFCIEVisaHAIeACQAQCYAa4BoAGnGKoBBDAuMjK4AQPIAQD4AQGYAh6gAq0ZqAIKwgIKEAAYAxjqAhiPAcICChAuGAMY6gIYjwHCAg4QLhiABBixAxjRAxjHAcICCBAAGIAEGLEDwgILEAAYgAQYsQMYgwHCAhQQLhiABBixAxjRAxiDARjHARiKBcICFxAuGIAEGLEDGNEDGIMBGNQCGMcBGIoFwgIIEC4YgAQYsQPCAgsQLhiABBjRAxjHAcICCxAuGIAEGMcBGK8BwgIEEAAYA8ICCxAuGIAEGLEDGIMBwgIFEC4YgATCAgcQLhiABBgKwgIOEC4YgAQYsQMYgwEYigXCAg4QABiABBixAxiDARiKBcICERAuGIAEGLEDGNEDGIMBGMcBmAMK8QW9CRKfaKhZvpIHBDguMjKgB-jCAbIHBDAuMjK4B_sYwgcJMC4xMC4xOS4xyAdw&sclient=gws-wiz",
+					"protocol": "https",
+					"host": [
+						"www",
+						"google",
+						"com"
+					],
+					"path": [
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "New+tech+academy"
+						},
+						{
+							"key": "sca_esv",
+							"value": "088ff9148b2d1b7b"
+						},
+						{
+							"key": "source",
+							"value": "hp"
+						},
+						{
+							"key": "ei",
+							"value": "-n5daNNKr6SR1Q_GkeBA"
+						},
+						{
+							"key": "iflsig",
+							"value": "AOw8s4IAAAAAaF2NCtmyMdXKUP33XpiOwkqz6J9Wp9-k"
+						},
+						{
+							"key": "ved",
+							"value": "0ahUKEwjTr4mWyo-OAxUvUqQEHcYIGAgQ4dUDCBc"
+						},
+						{
+							"key": "uact",
+							"value": "5"
+						},
+						{
+							"key": "oq",
+							"value": "New+tech+academy"
+						},
+						{
+							"key": "gs_lp",
+							"value": "Egdnd3Mtd2l6IhBOZXcgdGVjaCBhY2FkZW15MgUQABiABDIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHkjZbFCIEVisaHAIeACQAQCYAa4BoAGnGKoBBDAuMjK4AQPIAQD4AQGYAh6gAq0ZqAIKwgIKEAAYAxjqAhiPAcICChAuGAMY6gIYjwHCAg4QLhiABBixAxjRAxjHAcICCBAAGIAEGLEDwgILEAAYgAQYsQMYgwHCAhQQLhiABBixAxjRAxiDARjHARiKBcICFxAuGIAEGLEDGNEDGIMBGNQCGMcBGIoFwgIIEC4YgAQYsQPCAgsQLhiABBjRAxjHAcICCxAuGIAEGMcBGK8BwgIEEAAYA8ICCxAuGIAEGLEDGIMBwgIFEC4YgATCAgcQLhiABBgKwgIOEC4YgAQYsQMYgwEYigXCAg4QABiABBixAxiDARiKBcICERAuGIAEGLEDGNEDGIMBGMcBmAMK8QW9CRKfaKhZvpIHBDguMjKgB-jCAbIHBDAuMjK4B_sYwgcJMC4xMC4xOS4xyAdw"
+						},
+						{
+							"key": "sclient",
+							"value": "gws-wiz"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl 'https://www.google.com/search?q=New+tech+academy&sca_esv=088ff9148b2d1b7b&source=hp&ei=-n5daNNKr6SR1Q_GkeBA&iflsig=AOw8s4IAAAAAaF2NCtmyMdXKUP33XpiOwkqz6J9Wp9-k&ved=0ahUKEwjTr4mWyo-OAxUvUqQEHcYIGAgQ4dUDCBc&uact=5&oq=New+tech+academy&gs_lp=Egdnd3Mtd2l6IhBOZXcgdGVjaCBhY2FkZW15MgUQABiABDIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHkjZbFCIEVisaHAIeACQAQCYAa4BoAGnGKoBBDAuMjK4AQPIAQD4AQGYAh6gAq0ZqAIKwgIKEAAYAxjqAhiPAcICChAuGAMY6gIYjwHCAg4QLhiABBixAxjRAxjHAcICCBAAGIAEGLEDwgILEAAYgAQYsQMYgwHCAhQQLhiABBixAxjRAxiDARjHARiKBcICFxAuGIAEGLEDGNEDGIMBGNQCGMcBGIoFwgIIEC4YgAQYsQPCAgsQLhiABBjRAxjHAcICCxAuGIAEGMcBGK8BwgIEEAAYA8ICCxAuGIAEGLEDGIMBwgIFEC4YgATCAgcQLhiABBgKwgIOEC4YgAQYsQMYgwEYigXCAg4QABiABBixAxiDARiKBcICERAuGIAEGLEDGNEDGIMBGMcBmAMK8QW9CRKfaKhZvpIHBDguMjKgB-jCAbIHBDAuMjK4B_sYwgcJMC4xMC4xOS4xyAdw&sclient=gws-wiz' \\\r\n  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \\\r\n  -H 'accept-language: en-US,en;q=0.9,ar;q=0.8' \\\r\n  -H 'available-dictionary: :yZxs/3Ul71B7XWCStnf6gZgi0AqJ0XmayDjX5H08BOg=:' \\\r\n  -b 'SID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UIs4X1YjaBAD_97JNV3i5sgACgYKAe0SARESFQHGX2Mi5nFXevwv4KWHAoqvv0MrKBoVAUF8yKqCjPbvxvxxdxDpT_k8ZwXX0076; __Secure-1PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7U0ppMr430hrstMVXk0BOLvQACgYKAaMSARESFQHGX2MitltmByCdk6MykqxDXr1K0xoVAUF8yKp8MUdQzweafXvLBslC-Jvg0076; __Secure-3PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UH1VyO8IN-Y44DJlUdTG3QQACgYKAYkSARESFQHGX2MiN2BybW_CsK8W2MnQviD7YxoVAUF8yKrzUHS3vJDAZZAYBvDvI44s0076; HSID=AETAjawFsEeXE9KH9; SSID=AstZ14WOQqmHWE-Pj; APISID=ZTGnk3yypbiqydGU/A8bMzxBYx-MaOYshV; SAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-1PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-3PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; S=maestro=e9k8qnSzeeYhyaATGrIzu1fkejEkndS_9VDwVW25Wq4; NID=525=F82LbOqArVSwEHFNfMKyPUOYcf7yxGWUjou5YNvIxN56U8p9htTkjm-nYWLSBhiRrNHrL-_Q5Bi723-3V_Aq4PVAcVUae35GB2YaUCVM1pGgTcL26DKqcG3YA_j6WAueW5SRg5a6ro9J4907uZuEasU2fJ_jpeXk6ih4AB8tmdRXjaljScoChzMMa2S75ocuvuRg1-OsmU-iS5iyDydFenIa4BVMwcbg1njTx3QrOrTtjRTmkUrjxBD977qh5iZEa-6jmJjpUtlYTSnijCo_25z_e6IJq0qrCKWFFH7kVjwWEFiC6IfsDs6INXdTosfpCELtc63B43fLM9snSjgHyYqm-beU3g93s9hGpZeeEpQ-4v4fYU11zawbfChB65zA9YO_P9ophrBJiNRwrhB1Kq-DMJGaVZULEK6GDSmlcyPQGCscmvGcEvtfep1q2Pp5smtXYLtFvZXNa-VIdNrWL9BH9YPx9ufHaEA0dx3P_emUE7wf1VF0uVfm-9-VuMpdtl5Hr5XogTaEfmhpR07CLDkHT0c94iqZT635uDzO7tb1lD6a3eRCcp4sz0QY-EsW-8cJEz7UAudQPWGmhkrNb7UJM8C_81nCE7IhIO3oQmQMiikR7P8vVv-02C6qjljPMdv-qId2wyHI-aXnpsC7Z_nlvCgjct0GY7Dp-BHNmwfxUt2GirbCSqKWxlhlAvfj3DmkpbgMe7fwv7o_VgTKP5U6Dv22bWdWzftyj86XZprJT4y9VDvzC7z3y37oh4Ng118xFzwDybP-t-pdJWDzBRKt-q9w5UhpYOX-qryqzrP85UV7g-94HWWb8fuHNxE; __Secure-1PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; __Secure-3PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; AEC=AVh_V2h9T-uCiqQIu0AwqNRExINkYOuyJ2MZ-kPLgooRAvVeXrKIicWiiso; SIDCC=AKEyXzWEaN6KpkqlnxTkCOEoaXmpmY3HiF_Ssb8BkIVLupC9cBKFerV6Lubg1fnCvph840fcgr_-; __Secure-1PSIDCC=AKEyXzXKukFdLfgLxJT3nKHFLwrMUyont-Dc4UipAfSka9fK_iBI7TDbbPpx3O8Apuv8xAFz5I0; __Secure-3PSIDCC=AKEyXzUjW5ZLcwZBqwzOyBWrU8BK03YELMZqM0jJFLVyyNR4vLUHWx5iyZURyV_69mjCUrhLiAyQ' \\\r\n  -H 'downlink: 10' \\\r\n  -H 'priority: u=0, i' \\\r\n  -H 'referer: https://www.google.com/' \\\r\n  -H 'rtt: 50' \\\r\n  -H 'sec-ch-prefers-color-scheme: dark' \\\r\n  -H 'sec-ch-ua: \"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"' \\\r\n  -H 'sec-ch-ua-arch: \"x86\"' \\\r\n  -H 'sec-ch-ua-bitness: \"64\"' \\\r\n  -H 'sec-ch-ua-form-factors: \"Desktop\"' \\\r\n  -H 'sec-ch-ua-full-version: \"137.0.7151.120\"' \\\r\n  -H 'sec-ch-ua-full-version-list: \"Google Chrome\";v=\"137.0.7151.120\", \"Chromium\";v=\"137.0.7151.120\", \"Not/A)Brand\";v=\"24.0.0.0\"' \\\r\n  -H 'sec-ch-ua-mobile: ?0' \\\r\n  -H 'sec-ch-ua-model: \"\"' \\\r\n  -H 'sec-ch-ua-platform: \"Windows\"' \\\r\n  -H 'sec-ch-ua-platform-version: \"19.0.0\"' \\\r\n  -H 'sec-ch-ua-wow64: ?0' \\\r\n  -H 'sec-fetch-dest: document' \\\r\n  -H 'sec-fetch-mode: navigate' \\\r\n  -H 'sec-fetch-site: same-origin' \\\r\n  -H 'sec-fetch-user: ?1' \\\r\n  -H 'upgrade-insecure-requests: 1' \\\r\n  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36' \\\r\n  -H 'x-browser-channel: stable' \\\r\n  -H 'x-browser-copyright: Copyright 2025 Google LLC. All rights reserved.' \\\r\n  -H 'x-browser-validation: J9DSnQ4ykHeik2fBjbqtH+hIrks=' \\\r\n  -H 'x-browser-year: 2025' \\\r\n  -H 'x-client-data: CJa2yQEIo7bJAQipncoBCNWTywEIlqHLAQiSo8sBCIWgzQEIxd/OAQif7c4BCKXyzgEIvPLOAQiS9s4BGOHizgE='"
+			},
+			"response": []
+		},
+		{
+			"name": "https://www.google.com/search?q=Ali+Taha&sca_esv=088ff9148b2d1b7b&ei=Gn9daNyYNIjGkdUPmfPX0Qg&ved=0ahUKEwjcjd6lyo-OAxUIY6QEHZn5NYoQ4dUDCBA&uact=5&oq=Ali+Taha&gs_lp=Egxnd3Mtd2l6LXNlcnAiCEFsaSBUYWhhMgUQABiABDIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgW",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+					},
+					{
+						"key": "accept-language",
+						"value": "en-US,en;q=0.9,ar;q=0.8"
+					},
+					{
+						"key": "available-dictionary",
+						"value": ":yZxs/3Ul71B7XWCStnf6gZgi0AqJ0XmayDjX5H08BOg=:"
+					},
+					{
+						"key": "downlink",
+						"value": "10"
+					},
+					{
+						"key": "priority",
+						"value": "u=0, i"
+					},
+					{
+						"key": "referer",
+						"value": "https://www.google.com/"
+					},
+					{
+						"key": "rtt",
+						"value": "50"
+					},
+					{
+						"key": "sec-ch-prefers-color-scheme",
+						"value": "dark"
+					},
+					{
+						"key": "sec-ch-ua",
+						"value": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\""
+					},
+					{
+						"key": "sec-ch-ua-arch",
+						"value": "\"x86\""
+					},
+					{
+						"key": "sec-ch-ua-bitness",
+						"value": "\"64\""
+					},
+					{
+						"key": "sec-ch-ua-form-factors",
+						"value": "\"Desktop\""
+					},
+					{
+						"key": "sec-ch-ua-full-version",
+						"value": "\"137.0.7151.120\""
+					},
+					{
+						"key": "sec-ch-ua-full-version-list",
+						"value": "\"Google Chrome\";v=\"137.0.7151.120\", \"Chromium\";v=\"137.0.7151.120\", \"Not/A)Brand\";v=\"24.0.0.0\""
+					},
+					{
+						"key": "sec-ch-ua-mobile",
+						"value": "?0"
+					},
+					{
+						"key": "sec-ch-ua-model",
+						"value": "\"\""
+					},
+					{
+						"key": "sec-ch-ua-platform",
+						"value": "\"Windows\""
+					},
+					{
+						"key": "sec-ch-ua-platform-version",
+						"value": "\"19.0.0\""
+					},
+					{
+						"key": "sec-ch-ua-wow64",
+						"value": "?0"
+					},
+					{
+						"key": "sec-fetch-dest",
+						"value": "document"
+					},
+					{
+						"key": "sec-fetch-mode",
+						"value": "navigate"
+					},
+					{
+						"key": "sec-fetch-site",
+						"value": "same-origin"
+					},
+					{
+						"key": "sec-fetch-user",
+						"value": "?1"
+					},
+					{
+						"key": "upgrade-insecure-requests",
+						"value": "1"
+					},
+					{
+						"key": "user-agent",
+						"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+					},
+					{
+						"key": "x-browser-channel",
+						"value": "stable"
+					},
+					{
+						"key": "x-browser-copyright",
+						"value": "Copyright 2025 Google LLC. All rights reserved."
+					},
+					{
+						"key": "x-browser-validation",
+						"value": "J9DSnQ4ykHeik2fBjbqtH+hIrks="
+					},
+					{
+						"key": "x-browser-year",
+						"value": "2025"
+					},
+					{
+						"key": "x-client-data",
+						"value": "CJa2yQEIo7bJAQipncoBCNWTywEIlqHLAQiSo8sBCIWgzQEIxd/OAQif7c4BCKXyzgEIvPLOAQiS9s4BGOHizgE="
+					},
+					{
+						"key": "Cookie",
+						"value": "SID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UIs4X1YjaBAD_97JNV3i5sgACgYKAe0SARESFQHGX2Mi5nFXevwv4KWHAoqvv0MrKBoVAUF8yKqCjPbvxvxxdxDpT_k8ZwXX0076; __Secure-1PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7U0ppMr430hrstMVXk0BOLvQACgYKAaMSARESFQHGX2MitltmByCdk6MykqxDXr1K0xoVAUF8yKp8MUdQzweafXvLBslC-Jvg0076; __Secure-3PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UH1VyO8IN-Y44DJlUdTG3QQACgYKAYkSARESFQHGX2MiN2BybW_CsK8W2MnQviD7YxoVAUF8yKrzUHS3vJDAZZAYBvDvI44s0076; HSID=AETAjawFsEeXE9KH9; SSID=AstZ14WOQqmHWE-Pj; APISID=ZTGnk3yypbiqydGU/A8bMzxBYx-MaOYshV; SAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-1PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-3PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; S=maestro=e9k8qnSzeeYhyaATGrIzu1fkejEkndS_9VDwVW25Wq4; __Secure-1PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; __Secure-3PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; AEC=AVh_V2h9T-uCiqQIu0AwqNRExINkYOuyJ2MZ-kPLgooRAvVeXrKIicWiiso; NID=525=KFx9iHmZitOY1d1O2m39kjWFaemJyy67IIQJR6t3uqT9OLSHkCqoMjThGJN1GYXq7OEq2qdPGzRJy9dToQBsg1RUAqWX-mGaDYEvoKHNjbrAdV5ayqAGb5Udbp3FAJ79COOh1AsWOJBhhWcyley-RjrGullXvGmf22uNT8HGpfiqtRxBIzRujgmPb0NpRhS546TFGIeKLodo8C2VESVR6_VM9fUpoYaHZ1GAj28Ly38gcp3RGlYBSCEzd1BL20raxF46REC1tUcguMueeCaMhiEYDUcuzB-F08kqbpXvtyt3aNwB0ym9DRPQWMTjBXI8IsZAPciPW7ZyHEo419C5I-hhHgXBjXR6lA39aMxSuehcdrKYoyevG_SfasgeCHpqoPzAKDfNe7Rjo95wY8K6UHksn5fOeSmd0HaJWtMU5b8mKiulKO4Cu_qq3xMvsrQKcNf6R028zjY5-eJ57_sO0rk4IeK27QJ9vPfoQMVofwMeoY7r1iqlwGtBieelBTGm4GzVjJlCqDb42E4emksMQtVA8veCBUE1XSjlS-4nB8o4un2RUC-kZ7hQ2DNgnFvot79hAiPp30teGhvMpRhNcDj8WHcuHTjGWLXfMN9j8sD_hO_DgrlkLrp63xy8jOcPYT5V5tZpEmH54z9Pqs5sC6hrqGb4sQ55DFYVGjT63Fssjq6wGsR1ECClLCrZvtFSqLW125SSojySvFenjbjKOU22cIeIdluLKOolX237B44XMUas31pSgQXr_aOSycfJ3l9uyK4RjU1gAhCfjOfJ834qMzD7iMYSp6hRcd6tcH__xBhEtpFqHLEIflfI_r4; DV=M_aXkr9HbtchcOIVpget2HdaMojTellgRBBlclRLxwEAAAA; SIDCC=AKEyXzXA1p3btNPDUJMMf57LRNuPfD0D3MF8ysc_6bcDPCLuZmVdaiPYAildWjH2OaFRFEBaoDCg; __Secure-1PSIDCC=AKEyXzUqBpeCysr_asEjRYKTPubc_UlXLxFPpn06ecXdMqaZHwoSw4TkXDycxJh47KX01do5LTE; __Secure-3PSIDCC=AKEyXzVBZ3m8x5W4ce0v8V04koEq8OwVdqNfJJm3NLvq_rRg_EsRAU1o1_nadUXSMQ8RHdR8eCrW"
+					}
+				],
+				"url": {
+					"raw": "https://www.google.com/search?q=Ali+Taha&sca_esv=088ff9148b2d1b7b&ei=Gn9daNyYNIjGkdUPmfPX0Qg&ved=0ahUKEwjcjd6lyo-OAxUIY6QEHZn5NYoQ4dUDCBA&uact=5&oq=Ali+Taha&gs_lp=Egxnd3Mtd2l6LXNlcnAiCEFsaSBUYWhhMgUQABiABDIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHkiuX1DcTViIXXABeACQAQCYAagBoAHYCaoBAzAuOLgBA8gBAPgBAZgCCaACnQrCAg0QABiABBiwAxhDGIoFwgIJEAAYsAMYBxgewgIOEC4YgAQYsQMY0QMYxwHCAggQABiABBixA8ICCxAAGIAEGLEDGIMBwgIUEC4YgAQYsQMY0QMYgwEYxwEYigXCAh0QLhiABBixAxjRAxjHARiXBRjcBBjeBBjgBNgBAcICFxAuGIAEGLEDGNEDGIMBGNQCGMcBGIoFwgIIEC4YgAQYsQPCAgoQABiABBhDGIoFwgITEC4YgAQYsQMY0QMYQxjHARiKBcICChAuGIAEGEMYigXCAgsQLhiABBjHARivAcICEBAuGIAEGLEDGEMYgwEYigXCAgQQABgDwgIFEC4YgATCAgcQLhiABBgKwgIUEC4YgAQYlwUY3AQY3gQY3wTYAQGYAwCIBgGQBgq6BgYIARABGBSSBwMxLjigB9-LAbIHAzAuOLgHlwrCBwUyLTguMcgHOw&sclient=gws-wiz-serp",
+					"protocol": "https",
+					"host": [
+						"www",
+						"google",
+						"com"
+					],
+					"path": [
+						"search"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "Ali+Taha"
+						},
+						{
+							"key": "sca_esv",
+							"value": "088ff9148b2d1b7b"
+						},
+						{
+							"key": "ei",
+							"value": "Gn9daNyYNIjGkdUPmfPX0Qg"
+						},
+						{
+							"key": "ved",
+							"value": "0ahUKEwjcjd6lyo-OAxUIY6QEHZn5NYoQ4dUDCBA"
+						},
+						{
+							"key": "uact",
+							"value": "5"
+						},
+						{
+							"key": "oq",
+							"value": "Ali+Taha"
+						},
+						{
+							"key": "gs_lp",
+							"value": "Egxnd3Mtd2l6LXNlcnAiCEFsaSBUYWhhMgUQABiABDIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHkiuX1DcTViIXXABeACQAQCYAagBoAHYCaoBAzAuOLgBA8gBAPgBAZgCCaACnQrCAg0QABiABBiwAxhDGIoFwgIJEAAYsAMYBxgewgIOEC4YgAQYsQMY0QMYxwHCAggQABiABBixA8ICCxAAGIAEGLEDGIMBwgIUEC4YgAQYsQMY0QMYgwEYxwEYigXCAh0QLhiABBixAxjRAxjHARiXBRjcBBjeBBjgBNgBAcICFxAuGIAEGLEDGNEDGIMBGNQCGMcBGIoFwgIIEC4YgAQYsQPCAgoQABiABBhDGIoFwgITEC4YgAQYsQMY0QMYQxjHARiKBcICChAuGIAEGEMYigXCAgsQLhiABBjHARivAcICEBAuGIAEGLEDGEMYgwEYigXCAgQQABgDwgIFEC4YgATCAgcQLhiABBgKwgIUEC4YgAQYlwUY3AQY3gQY3wTYAQGYAwCIBgGQBgq6BgYIARABGBSSBwMxLjigB9-LAbIHAzAuOLgHlwrCBwUyLTguMcgHOw"
+						},
+						{
+							"key": "sclient",
+							"value": "gws-wiz-serp"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl 'https://www.google.com/search?q=Ali+Taha&sca_esv=088ff9148b2d1b7b&ei=Gn9daNyYNIjGkdUPmfPX0Qg&ved=0ahUKEwjcjd6lyo-OAxUIY6QEHZn5NYoQ4dUDCBA&uact=5&oq=Ali+Taha&gs_lp=Egxnd3Mtd2l6LXNlcnAiCEFsaSBUYWhhMgUQABiABDIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHjIGEAAYFhgeMgYQABgWGB4yBhAAGBYYHkiuX1DcTViIXXABeACQAQCYAagBoAHYCaoBAzAuOLgBA8gBAPgBAZgCCaACnQrCAg0QABiABBiwAxhDGIoFwgIJEAAYsAMYBxgewgIOEC4YgAQYsQMY0QMYxwHCAggQABiABBixA8ICCxAAGIAEGLEDGIMBwgIUEC4YgAQYsQMY0QMYgwEYxwEYigXCAh0QLhiABBixAxjRAxjHARiXBRjcBBjeBBjgBNgBAcICFxAuGIAEGLEDGNEDGIMBGNQCGMcBGIoFwgIIEC4YgAQYsQPCAgoQABiABBhDGIoFwgITEC4YgAQYsQMY0QMYQxjHARiKBcICChAuGIAEGEMYigXCAgsQLhiABBjHARivAcICEBAuGIAEGLEDGEMYgwEYigXCAgQQABgDwgIFEC4YgATCAgcQLhiABBgKwgIUEC4YgAQYlwUY3AQY3gQY3wTYAQGYAwCIBgGQBgq6BgYIARABGBSSBwMxLjigB9-LAbIHAzAuOLgHlwrCBwUyLTguMcgHOw&sclient=gws-wiz-serp' \\\r\n  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \\\r\n  -H 'accept-language: en-US,en;q=0.9,ar;q=0.8' \\\r\n  -H 'available-dictionary: :yZxs/3Ul71B7XWCStnf6gZgi0AqJ0XmayDjX5H08BOg=:' \\\r\n  -b 'SID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UIs4X1YjaBAD_97JNV3i5sgACgYKAe0SARESFQHGX2Mi5nFXevwv4KWHAoqvv0MrKBoVAUF8yKqCjPbvxvxxdxDpT_k8ZwXX0076; __Secure-1PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7U0ppMr430hrstMVXk0BOLvQACgYKAaMSARESFQHGX2MitltmByCdk6MykqxDXr1K0xoVAUF8yKp8MUdQzweafXvLBslC-Jvg0076; __Secure-3PSID=g.a000yQhFkbDjOwZ9Re8FVJOIMKo47rkoZDID8Ca7Sh2okJG-pF7UH1VyO8IN-Y44DJlUdTG3QQACgYKAYkSARESFQHGX2MiN2BybW_CsK8W2MnQviD7YxoVAUF8yKrzUHS3vJDAZZAYBvDvI44s0076; HSID=AETAjawFsEeXE9KH9; SSID=AstZ14WOQqmHWE-Pj; APISID=ZTGnk3yypbiqydGU/A8bMzxBYx-MaOYshV; SAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-1PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; __Secure-3PAPISID=jHut8kpJGtWic1qA/AzHxWyOC_H5uNT2y4; S=maestro=e9k8qnSzeeYhyaATGrIzu1fkejEkndS_9VDwVW25Wq4; __Secure-1PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; __Secure-3PSIDTS=sidts-CjEB5H03P-CP6pzCerzGtCSadetAOD3BsRxKjvA2ucMIXitzFY-erOQmp7T3ihWrp231EAA; AEC=AVh_V2h9T-uCiqQIu0AwqNRExINkYOuyJ2MZ-kPLgooRAvVeXrKIicWiiso; NID=525=KFx9iHmZitOY1d1O2m39kjWFaemJyy67IIQJR6t3uqT9OLSHkCqoMjThGJN1GYXq7OEq2qdPGzRJy9dToQBsg1RUAqWX-mGaDYEvoKHNjbrAdV5ayqAGb5Udbp3FAJ79COOh1AsWOJBhhWcyley-RjrGullXvGmf22uNT8HGpfiqtRxBIzRujgmPb0NpRhS546TFGIeKLodo8C2VESVR6_VM9fUpoYaHZ1GAj28Ly38gcp3RGlYBSCEzd1BL20raxF46REC1tUcguMueeCaMhiEYDUcuzB-F08kqbpXvtyt3aNwB0ym9DRPQWMTjBXI8IsZAPciPW7ZyHEo419C5I-hhHgXBjXR6lA39aMxSuehcdrKYoyevG_SfasgeCHpqoPzAKDfNe7Rjo95wY8K6UHksn5fOeSmd0HaJWtMU5b8mKiulKO4Cu_qq3xMvsrQKcNf6R028zjY5-eJ57_sO0rk4IeK27QJ9vPfoQMVofwMeoY7r1iqlwGtBieelBTGm4GzVjJlCqDb42E4emksMQtVA8veCBUE1XSjlS-4nB8o4un2RUC-kZ7hQ2DNgnFvot79hAiPp30teGhvMpRhNcDj8WHcuHTjGWLXfMN9j8sD_hO_DgrlkLrp63xy8jOcPYT5V5tZpEmH54z9Pqs5sC6hrqGb4sQ55DFYVGjT63Fssjq6wGsR1ECClLCrZvtFSqLW125SSojySvFenjbjKOU22cIeIdluLKOolX237B44XMUas31pSgQXr_aOSycfJ3l9uyK4RjU1gAhCfjOfJ834qMzD7iMYSp6hRcd6tcH__xBhEtpFqHLEIflfI_r4; DV=M_aXkr9HbtchcOIVpget2HdaMojTellgRBBlclRLxwEAAAA; SIDCC=AKEyXzXA1p3btNPDUJMMf57LRNuPfD0D3MF8ysc_6bcDPCLuZmVdaiPYAildWjH2OaFRFEBaoDCg; __Secure-1PSIDCC=AKEyXzUqBpeCysr_asEjRYKTPubc_UlXLxFPpn06ecXdMqaZHwoSw4TkXDycxJh47KX01do5LTE; __Secure-3PSIDCC=AKEyXzVBZ3m8x5W4ce0v8V04koEq8OwVdqNfJJm3NLvq_rRg_EsRAU1o1_nadUXSMQ8RHdR8eCrW' \\\r\n  -H 'downlink: 10' \\\r\n  -H 'priority: u=0, i' \\\r\n  -H 'referer: https://www.google.com/' \\\r\n  -H 'rtt: 50' \\\r\n  -H 'sec-ch-prefers-color-scheme: dark' \\\r\n  -H 'sec-ch-ua: \"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"' \\\r\n  -H 'sec-ch-ua-arch: \"x86\"' \\\r\n  -H 'sec-ch-ua-bitness: \"64\"' \\\r\n  -H 'sec-ch-ua-form-factors: \"Desktop\"' \\\r\n  -H 'sec-ch-ua-full-version: \"137.0.7151.120\"' \\\r\n  -H 'sec-ch-ua-full-version-list: \"Google Chrome\";v=\"137.0.7151.120\", \"Chromium\";v=\"137.0.7151.120\", \"Not/A)Brand\";v=\"24.0.0.0\"' \\\r\n  -H 'sec-ch-ua-mobile: ?0' \\\r\n  -H 'sec-ch-ua-model: \"\"' \\\r\n  -H 'sec-ch-ua-platform: \"Windows\"' \\\r\n  -H 'sec-ch-ua-platform-version: \"19.0.0\"' \\\r\n  -H 'sec-ch-ua-wow64: ?0' \\\r\n  -H 'sec-fetch-dest: document' \\\r\n  -H 'sec-fetch-mode: navigate' \\\r\n  -H 'sec-fetch-site: same-origin' \\\r\n  -H 'sec-fetch-user: ?1' \\\r\n  -H 'upgrade-insecure-requests: 1' \\\r\n  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36' \\\r\n  -H 'x-browser-channel: stable' \\\r\n  -H 'x-browser-copyright: Copyright 2025 Google LLC. All rights reserved.' \\\r\n  -H 'x-browser-validation: J9DSnQ4ykHeik2fBjbqtH+hIrks=' \\\r\n  -H 'x-browser-year: 2025' \\\r\n  -H 'x-client-data: CJa2yQEIo7bJAQipncoBCNWTywEIlqHLAQiSo8sBCIWgzQEIxd/OAQif7c4BCKXyzgEIvPLOAQiS9s4BGOHizgE='"
+			},
+			"response": []
+		}
+	]
+}
