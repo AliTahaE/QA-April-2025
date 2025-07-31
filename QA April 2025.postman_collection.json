@@ -287,7 +287,7 @@
 				"header": [
 					{
 						"key": "Cookie",
-						"value": "token=8c5ac87edebad7e",
+						"value": "token=eaaf88f43eb43b4",
 						"type": "text"
 					},
 					{
@@ -311,7 +311,7 @@
 					}
 				},
 				"url": {
-					"raw": "https://restful-booker.herokuapp.com/booking/378",
+					"raw": "https://restful-booker.herokuapp.com/booking/388",
 					"protocol": "https",
 					"host": [
 						"restful-booker",
@@ -320,7 +320,7 @@
 					],
 					"path": [
 						"booking",
-						"378"
+						"388"
 					]
 				}
 			},
